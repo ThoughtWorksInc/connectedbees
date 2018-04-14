@@ -20,3 +20,6 @@ build
 
 # Any keys or certs for AWS
 *.pem
+
+# Transient properties used for the deploy.sh scrip
+properties.sh
