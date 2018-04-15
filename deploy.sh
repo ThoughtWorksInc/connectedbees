@@ -50,7 +50,7 @@ echo "${WHITE}>> Baking wifi credentials into device${NC}"
 ~/.mos/bin/mos wifi "$WIFI_SSID" "$WIFI_PASSWORD" --port "$SERIAL_PORT"
 
 echo "${WHITE}>> transfering firmware to device${NC}"
-~/.mos/bin/mos put init.js --port "$SERIAL_PORT"
+~/.mos/bin/mos put fs/init.js --port "$SERIAL_PORT"
 
 echo "${WHITE}>> All done. Restarting device...${NC}"
 ~/.mos/bin/mos call Sys.Reboot --port "$SERIAL_PORT"
