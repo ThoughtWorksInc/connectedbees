@@ -10,12 +10,14 @@ let led = Cfg.get('pins.led');
 let button = Cfg.get('pins.button');
 let pirButton = 4;
 let soundButton = 27;
+let lightButton = 12;
 
 
 let topic = '/devices/' + Cfg.get('device.id') + '/events';
 let pirTopic = '/devices/' + Cfg.get('device.id') + '/pir/state';
 let buttonTopic = '/devices/' + Cfg.get('device.id') + '/button/state';
 let soundTopic = '/devices/' + Cfg.get('device.id') + '/sound/state';
+let lightTopic = '/devices/' + Cfg.get('device.id') + '/light/state';
 
 print('LED GPIO:', led, 'button GPIO:', button);
 
@@ -46,6 +48,13 @@ GPIO.set_button_handler(soundButton, GPIO.PULL_UP, GPIO.INT_EDGE_NEG, 200, funct
   let message = 'soundDetected';
   let ok = MQTT.pub(soundTopic, message, 1);
   print('SOUND Published:', ok, soundTopic, '->', message);
+}, null);
+
+// Publish to MQTT topic when light present. Wired to GPIO pin 12
+GPIO.set_button_handler(lightButton, GPIO.PULL_UP, GPIO.INT_EDGE_NEG, 200, function() {
+  let message = 'lightDetected';
+  let ok = MQTT.pub(lightTopic, message, 1);
+  print('LIGHT Published:', ok, lightTopic, '->', message);
 }, null);
 
 
