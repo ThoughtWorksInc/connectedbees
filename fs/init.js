@@ -4,23 +4,50 @@ load('api_gpio.js');
 load('api_mqtt.js');
 load('api_net.js');
 load('api_sys.js');
+load('api_timer.js');
 
-let button = 4;
-let topic = '/devices/' + Cfg.get('device.id') + '/state';
-let roomId = "fill_in_room_id_here";
+let led = Cfg.get('pins.led');
+let button = Cfg.get('pins.button');
+let pirButton = 4;
+let soundButton = 27;
 
-function publish(topic, message) {
-  let ok = MQTT.pub(topic, message, 1, true);
-  print('Success:', ok ? 'yes' : 'no');
-  print('Published:', ok, topic, '->', message);
-}
 
-GPIO.set_button_handler(button, GPIO.PULL_UP, GPIO.INT_EDGE_ANY, 200, function(pin) {
-  let pinValue = GPIO.read(pin);
-  print('Interrupt with ', pinValue);
-  let message = JSON.stringify({status: pinValue, room: roomId});
-  publish(topic, message);
+let topic = '/devices/' + Cfg.get('device.id') + '/events';
+let pirTopic = '/devices/' + Cfg.get('device.id') + '/pir/state';
+let buttonTopic = '/devices/' + Cfg.get('device.id') + '/button/state';
+let soundTopic = '/devices/' + Cfg.get('device.id') + '/sound/state';
+
+print('LED GPIO:', led, 'button GPIO:', button);
+
+let getInfo = function() {
+  return JSON.stringify({
+    total_ram: Sys.total_ram(),
+    free_ram: Sys.free_ram()
+  });
+};
+
+
+// Publish to MQTT topic on a button press. Button is wired to GPIO pin 0
+GPIO.set_button_handler(button, GPIO.PULL_UP, GPIO.INT_EDGE_NEG, 200, function() {
+  let message = 'pressed';
+  let ok = MQTT.pub(buttonTopic, message, 1);
+  print('Published:', ok, buttonTopic, '->', message);
 }, null);
+
+// Publish to MQTT topic on a pir active. Wired to GPIO pin 4
+GPIO.set_button_handler(pirButton, GPIO.PULL_UP, GPIO.INT_EDGE_NEG, 200, function() {
+  let message = 'activated';
+  let ok = MQTT.pub(pirTopic, message, 1);
+  print('PIR Published:', ok, pirTopic, '->', message);
+}, null);
+
+// Publish to MQTT topic on a sound active. Wired to GPIO pin 27
+GPIO.set_button_handler(soundButton, GPIO.PULL_UP, GPIO.INT_EDGE_NEG, 200, function() {
+  let message = 'soundDetected';
+  let ok = MQTT.pub(soundTopic, message, 1);
+  print('SOUND Published:', ok, soundTopic, '->', message);
+}, null);
+
 
 // Monitor network connectivity.
 Event.addGroupHandler(Net.EVENT_GRP, function(ev, evdata, arg) {
@@ -36,4 +63,3 @@ Event.addGroupHandler(Net.EVENT_GRP, function(ev, evdata, arg) {
   }
   print('== Net event:', ev, evs);
 }, null);
-
