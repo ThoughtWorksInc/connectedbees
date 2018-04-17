@@ -80,8 +80,8 @@ Timer.set(5000 /* milliseconds */, Timer.REPEAT, function() {
 
   print('Temperature:', t, '*C');
   print('Humidity:', h, '%');
-  let tempMessage = JSON.stringify({status: t, room: roomId});
-  let humMessage = JSON.stringify({status: h, room: roomId});
+  let tempMessage = JSON.stringify({temp: t, room: roomId});
+  let humMessage = JSON.stringify({humidity: h, room: roomId});
 
   let tok = MQTT.pub(tempTopic, tempMessage, 1);
   print('TEMP Published:', tok, tempTopic, '->', tempMessage);
